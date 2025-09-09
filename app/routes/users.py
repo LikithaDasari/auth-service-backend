@@ -1,5 +1,5 @@
-from fastapi import FastAPI, Depends, HTTPException, status, APIRouter
-from sqlmodel import Session, create_engine, Field, SQLModel, select
+from fastapi import Depends, HTTPException, status, APIRouter
+from sqlmodel import Session, select
 from app.db.database import get_session
 from app.core.config import ACCESS_TOKEN_EXPIRE_MINUTES, REFRESH_TOKEN_EXPIRE_MINUTES
 from app.models.user import User
@@ -13,6 +13,7 @@ from jose import jwt, JWTError
 
 router = APIRouter()
 
+
 @router.post("/registration")
 def register_user(user_data: CreateUser, session: Session =Depends(get_session)):
 
@@ -24,6 +25,7 @@ def register_user(user_data: CreateUser, session: Session =Depends(get_session))
     session.refresh(new_user)
 
     return {"message":"User registered successfully", "user_id": new_user.id}
+
 
 @router.post("/login")
 def login(form_data: CreateUser = Depends(), session: Session = Depends(get_session)):
