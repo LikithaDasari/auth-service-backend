@@ -16,14 +16,14 @@ def get_current_user(
     token = credentials.credentials
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get("sub")
+        email: str = payload.get("sub")
         token_type: str = payload.get("token_type")
-        if username is None or token_type != "access":
+        if email is None or token_type != "access":
             raise HTTPException(status_code=401, detail="Invalid authentication")
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid authentication")
 
-    statement = select(User).where(User.username == username)
+    statement = select(User).where(User.email == email)
     user = session.exec(statement).first()
 
     if not user:
