@@ -3,7 +3,7 @@ from sqlmodel import Session, select
 from app.core.middleware import limiter
 from app.db.database import get_session
 from app.models.user import User
-from app.schemas.user import CreateUser, UserVerify
+from app.schemas.user import CreateUser, UserVerify, CreateUserResponse, UserVerifyResponse
 from app.utils.email import send_otp_email, send_success_email
 from app.utils.password_validation import validate_password
 from app.utils.security import hash_password
@@ -16,7 +16,7 @@ router = APIRouter()
 
 
 
-@router.post("/registration")
+@router.post("/registration", response_model = CreateUserResponse)
 @limiter.limit("3/minute")
 def register_user(user_data: CreateUser, request: Request, session: Session =Depends(get_session)):
 
@@ -35,14 +35,16 @@ def register_user(user_data: CreateUser, request: Request, session: Session =Dep
     expiry_time_ist = expiry_time.astimezone(ist)
     client_host = request.client.host
 
-    new_user = User(email=user_data.email, 
-                    hashed_password = hashed_password, 
-                    otp = otp, 
-                    otp_expires_at=expiry_time,
-                    otp_attempts=0,
-                    created_at=datetime.now(ist), 
-                    registered_ip = client_host 
-                    )
+    new_user = User(
+        email=user_data.email, 
+        first_name = user_data.first_name,
+        hashed_password = hashed_password, 
+        otp = otp, 
+        otp_expires_at=expiry_time,
+        otp_attempts=0,
+        created_at=datetime.now(ist), 
+        registered_ip = client_host 
+    )
 
     session.add(new_user)
     session.commit()
@@ -50,20 +52,21 @@ def register_user(user_data: CreateUser, request: Request, session: Session =Dep
 
     send_otp_email(new_user.email, otp)
 
-    return {
-        "message": f"User registered. Verify with OTP before it expires.",
-        "user_id": new_user.id,
-        "otp_expires_at": expiry_time_ist.strftime("%Y-%m-%d %H:%M:%S UTC"),
-        "registered_ip": client_host}
+    return CreateUserResponse(
+        message="User registered. Verify with OTP before it expires.",
+        user_id=new_user.id,
+        otp_expires_at=expiry_time_ist.strftime("%Y-%m-%d %H:%M:%S UTC"),
+        registered_ip=client_host
+    )
 
 
-
-@router.post("/verify")
+@router.post("/verify", response_model = UserVerifyResponse)
 @limiter.limit("5/minute")
-async def verify_account(data: UserVerify, 
-                         request: Request, 
-                         session: Session = Depends(get_session), 
-                         background_tasks: BackgroundTasks = None
+async def verify_account(
+    data: UserVerify, 
+    request: Request, 
+    session: Session = Depends(get_session), 
+    background_tasks: BackgroundTasks = None
 ):
     user = session.query(User).filter(User.id == data.user_id).first()
     
@@ -94,15 +97,18 @@ async def verify_account(data: UserVerify,
 
     background_tasks.add_task(send_success_email, user.email)
 
-    return {"message": "Account verified successfully. Confirmation mail sent."}
+    return UserVerifyResponse(
+        message = "Account verified successfully. Confirmation mail sent."
+    )
 
 
 
 @router.post("/resend-otp/{user_id}")
 @limiter.limit("5/minute")
-def resend_otp(user_id: str, 
-               request: Request, 
-               session: Session = Depends(get_session)
+def resend_otp(
+    user_id: str, 
+    request: Request, 
+    session: Session = Depends(get_session)
 ):
     user = session.get(User, user_id)
     if not user:

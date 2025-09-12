@@ -1,9 +1,9 @@
-from fastapi import Depends, HTTPException, status, APIRouter, Request
+from fastapi import Depends, HTTPException, APIRouter
 from sqlmodel import Session, select
 from app.auth.dependencies import get_current_user
 from app.db.database import get_session
 from app.models.user import User
-from app.schemas.user import ChangePassword
+from app.schemas.user import ChangePassword, ChangePasswordResponse
 from app.utils.email import send_password_change_email, reset_password_email
 from app.utils.password_validation import validate_password
 from app.utils.security import hash_password, verify_password
@@ -16,7 +16,7 @@ router = APIRouter()
 
 
 
-@router.post("/change-password")
+@router.post("/change-password", response_model = ChangePasswordResponse)
 def change_password(
     data: ChangePassword,
     session: Session = Depends(get_session),
@@ -43,8 +43,9 @@ def change_password(
 
     send_password_change_email(current_user.email)
 
-    return {"message": "Password changed successfully"}
-
+    return ChangePasswordResponse(
+        message = "Password changed successfully"
+    )
 @router.post("/forgot-password")
 def forgot_password(email: str, session: Session = Depends(get_session)):
     user = session.exec(select(User).where(User.email == email)).first()

@@ -18,6 +18,7 @@ def send_email(to_email: str, subject: str, body: str):
     msg["To"] = to_email
 
     try:
+        print("smtp_user", smtp_user, smtp_password)
         with smtplib.SMTP(smtp_server, smtp_port) as server:
             server.starttls()
             server.login(smtp_user, smtp_password)

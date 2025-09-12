@@ -5,11 +5,9 @@ from app.core.config import ACCESS_TOKEN_EXPIRE_MINUTES, REFRESH_TOKEN_EXPIRE_MI
 from app.core.middleware import limiter
 from app.db.database import get_session
 from app.models.user import User
-from app.schemas.user import UserLogin, ChangePassword
-from app.utils.email import send_password_change_email
+from app.schemas.user import UserLogin, UserLoginResponse
 from app.utils.jwt_handler import create_access_token, create_refresh_token
-from app.utils.password_validation import validate_password
-from app.utils.security import hash_password, verify_password
+from app.utils.security import verify_password
 from datetime import datetime, timedelta
 from jose import jwt, JWTError
 import pytz 
@@ -19,7 +17,7 @@ router = APIRouter()
 
 
 
-@router.post("/login")
+@router.post("/login", response_model = UserLoginResponse)
 @limiter.limit("5/minute")
 def login(form_data: UserLogin, 
           request: Request, 
@@ -57,12 +55,16 @@ def login(form_data: UserLogin,
     session.commit()
     session.refresh(result)
 
-    return {"message": "Login successful", 
-            "user_id": result.id, 
-            "last_login": result.last_login_at.strftime("%Y-%m-%d %H:%M:%S %Z"),
-            "last_login_ip": client_host,  
-            "access_token": access_token, 
-            "refresh_token": refresh_token}
+    return UserLoginResponse(
+        message = "Login successful", 
+        user_id = result.id, 
+        first_name = result.first_name,
+        last_login = result.last_login_at.strftime("%Y-%m-%d %H:%M:%S %Z"),
+        last_login_ip = client_host,  
+        access_token = access_token, 
+        refresh_token = refresh_token
+    )
+
 
 
 
