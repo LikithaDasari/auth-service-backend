@@ -50,3 +50,4 @@ def downgrade() -> None:
     op.create_index(op.f('ix_user_id'), 'user', ['id'], unique=False)
     op.create_index(op.f('ix_user_email'), 'user', ['email'], unique=True)
     # ### end Alembic commands ###
+    

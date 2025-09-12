@@ -67,7 +67,6 @@ def login(form_data: UserLogin,
 
 
 
-
 @router.post("/refresh-token")
 async def refresh_access_token(refresh_token: str):
     try:

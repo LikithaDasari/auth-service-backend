@@ -8,6 +8,7 @@ class User(SQLModel, table=True):
     __table_args__ = {"extend_existing": True}
     id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True, index=True)
     email: str = Field(unique=True, index=True, nullable=False)
+    name : Optional[str] = None
     hashed_password: str
     password_changed_at: Optional[datetime] = None
     otp: Optional[str] = None
@@ -17,5 +18,11 @@ class User(SQLModel, table=True):
     created_at: datetime = Field(default_factory=datetime.now)
     registered_ip: Optional[str] = None   
     last_login_at: Optional[datetime] = None
-    last_login_ip: Optional[str] = None
-    first_name : Optional[str] = None 
+    last_login_ip: Optional[str] = None 
+
+
+class Post(SQLModel, table=True):
+    __tablename__ = "posts" 
+    __table_args__ = {"extend_existing": True}
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True, index=True)
+    content: str

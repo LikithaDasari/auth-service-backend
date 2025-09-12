@@ -37,7 +37,7 @@ def register_user(user_data: CreateUser, request: Request, session: Session =Dep
 
     new_user = User(
         email=user_data.email, 
-        first_name = user_data.first_name,
+        first_name = user_data.first_name, 
         hashed_password = hashed_password, 
         otp = otp, 
         otp_expires_at=expiry_time,
