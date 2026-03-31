@@ -16,7 +16,7 @@ config = context.config
 
 # Override sqlalchemy.url in alembic.ini with .env value
 if DATABASE_URL:
-    config.set_main_option("sqlalchemy.url", DATABASE_URL)
+    config.set_main_option("sqlalchemy.url", DATABASE_URL.replace("%", "%%"))
 
 # Interpret the config file for Python logging
 if config.config_file_name is not None:

@@ -58,7 +58,7 @@ def login(form_data: UserLogin,
     return UserLoginResponse(
         message = "Login successful", 
         user_id = result.id, 
-        first_name = result.first_name,
+        first_name = result.first_name or "User",
         last_login = result.last_login_at.strftime("%Y-%m-%d %H:%M:%S %Z"),
         last_login_ip = client_host,  
         access_token = access_token, 

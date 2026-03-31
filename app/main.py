@@ -2,7 +2,7 @@ import uvicorn
 from fastapi import FastAPI
 from app.db.database import create_db_and_tables
 from app.routes import login, registration, password
-from core.middleware import limiter, rate_limit_exceeded_handler
+from app.core.middleware import limiter, rate_limit_exceeded_handler
 from slowapi.middleware import SlowAPIMiddleware
 from slowapi.errors import RateLimitExceeded 
 
