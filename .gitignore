@@ -36,3 +36,8 @@ build/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Temporary and lock files
+tmp/
+.lock
+CACHEDIR.TAG
